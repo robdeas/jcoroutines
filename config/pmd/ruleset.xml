@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="RobCustomRules"
+         xmlns="https://pmd.github.io/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:pmd-java="java:pmd"
+         xsi:schemaLocation="https://pmd.github.io/ruleset/2.0.0 https://pmd.github.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Built-in PMD categories + custom rules enforcing JSpecify nullness:
+        - Forbid JetBrains @Nullable (use JSpecify @Nullable instead).
+        - Allow JetBrains @NotNull only where JSpecify is weak (locals/catch/foreach/resources).
+    </description>
+
+    <!-- Built-in PMD categories -->
+    <rule ref="category/java/bestpractices.xml"/>
+    <rule ref="category/java/errorprone.xml"/>
+    <rule ref="category/java/design.xml"/>
+    <rule ref="category/java/codestyle.xml"/>
+
+    <!-- JetBrains @NotNull only on locals / catch / for-each / try-with-resources -->
+    <rule name="JetBrainsNotNullOnlyWhereJSpecifyIsWeak"
+          language="java"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+          message="Use JSpecify for APIs; JetBrains @NotNull only on locals/catch/for-each/resource vars.">
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+          //Annotation[
+            TypeName[pmd-java:typeIs('org.jetbrains.annotations.NotNull')]
+            and not(
+              ancestor::LocalVariableDeclaration
+              or ancestor::CatchFormalParameter
+              or ancestor::EnhancedForStatement
+              or ancestor::Resource
+            )
+          ]
+        ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Forbid JetBrains @Nullable (use JSpecify @Nullable instead) -->
+    <rule name="JetBrainsNullableNotAllowed"
+          language="java"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+          message="Use JSpecify @Nullable (org.jspecify.annotations.Nullable), not JetBrains @Nullable.">
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+        (
+          //Annotation/TypeName[pmd-java:typeIs('org.jetbrains.annotations.Nullable')]
+        )
+        |
+        (
+          //Annotation/Name[@Image = 'org.jetbrains.annotations.Nullable']
+        )
+      ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule name="JetBrainsNullableImportNotAllowed"
+          language="java"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+          message="Do not import org.jetbrains.annotations.Nullable (or star).">
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+        //ImportDeclaration[
+          (@PackageName = 'org.jetbrains.annotations' and @ImportedName = 'Nullable')
+          or (@PackageName = 'org.jetbrains.annotations' and @ImportedName = '*')
+        ]
+      ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule name="UnqualifiedNullableMustBeJSpecify"
+          language="java"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+          message="Unqualified @Nullable must import org.jspecify.annotations.Nullable">
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+        //Annotation/Name[@Image = 'Nullable']
+          [ not(ancestor::CompilationUnit/ImportDeclaration
+                 [@PackageName='org.jspecify.annotations' and @ImportedName='Nullable']) ]
+      ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+
+
+</ruleset>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Java's conventions of an unnecessary null check are what made nulls a mess -->
+    <!-- 1) Defensive null checks in Channel: allow RCN only in these methods (This is library, it should be very defensive) -->
+    <Match>
+        <Class name="tech.robd.jcoroutines.Channel"/>
+        <Or>
+            <Method name="send"/>
+            <Method name="receive"/>
+        </Or>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+    </Match>
+
+</FindBugsFilter>
