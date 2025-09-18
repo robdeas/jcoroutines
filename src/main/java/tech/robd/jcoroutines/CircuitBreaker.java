@@ -8,10 +8,23 @@
  structured: yes
  [/File Info]
 */
+/*
+ * Copyright (c) 2025 Rob Deas Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package tech.robd.jcoroutines;
 
-import kotlin.RequiresOptIn;
 import org.jspecify.annotations.NonNull;
 
 import java.lang.annotation.Documented;
@@ -29,14 +42,24 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Thread-safe circuit breaker with atomic state management and proper concurrency control.
  *
- * Key improvements over original:
+ * Circuit breaker included experimentally to explore async resilience patterns. May move to a separate library based on usage patterns and feedback."
+ *
+ * Features some thread safety , but not yet fully complete:
  * - Uses AtomicReference for state instead of volatile field
  * - Atomic state transitions using compareAndSet operations
  * - Proper synchronization of probe slot management
  * - Read-write lock coordination for complex state changes
- * - Eliminates race conditions in state transitions
+ * - Fixed critical race conditions in failure handling
+ *
+ * WARNING: Still has some race conditions in read-lock to write-lock transitions.
+ * A more comprehensive fix is planned for a future release.
+ *
+ * KNOWN ISSUES:
+ * - Gap between read lock release and write lock acquisition in advanceStateIfNeeded()
+ * - Multiple threads can simultaneously attempt time-based state transitions
+ * - Success count incrementing outside of proper synchronization in some paths
  */
-@Experimental("Circuit breaker concurrency model under development")// Won't be removed, but signals caution
+@Experimental("Circuit breaker concurrency model under development - some race conditions remain")
 public final class CircuitBreaker {
 
     public enum State { CLOSED, OPEN, HALF_OPEN }
@@ -59,26 +82,25 @@ public final class CircuitBreaker {
     // Lock for coordinating complex state transitions
     private final ReentrantReadWriteLock stateLock = new ReentrantReadWriteLock();
 
-    // Registry
-    private static final ConcurrentHashMap<String, CircuitBreaker> REGISTRY = new ConcurrentHashMap<>();
 
-    // Constructors
+    static final ConcurrentHashMap<String, CircuitBreaker> REGISTRY = new ConcurrentHashMap<>();
+
     public CircuitBreaker() {
         this("default", 5, Duration.ofMinutes(1), 3, 1);
     }
 
     public CircuitBreaker(@NonNull final String name,
-                               final int failureThreshold,
-                               @NonNull final Duration openTimeout,
-                               final int successThreshold) {
+                          final int failureThreshold,
+                          @NonNull final Duration openTimeout,
+                          final int successThreshold) {
         this(name, failureThreshold, openTimeout, successThreshold, 1);
     }
 
     public CircuitBreaker(@NonNull String name,
-                               int failureThreshold,
-                               @NonNull Duration openTimeout,
-                               int successThreshold,
-                               int halfOpenMaxProbes) {
+                          int failureThreshold,
+                          @NonNull Duration openTimeout,
+                          int successThreshold,
+                          int halfOpenMaxProbes) {
         if (name == null || openTimeout == null) {
             throw new IllegalArgumentException("Name/timeout cannot be null");
         }
@@ -102,7 +124,6 @@ public final class CircuitBreaker {
                 k -> new CircuitBreaker(k, 5, Duration.ofMinutes(1), 3, 1));
     }
 
-    // Core execution method
     public <T> T execute(@NonNull SuspendContext s, @NonNull SuspendFunction<T> op) {
         if (s == null || op == null) throw new IllegalArgumentException("args");
         s.checkCancellation();
@@ -143,7 +164,6 @@ public final class CircuitBreaker {
         return execute(s, ctx -> ctx.withTimeout(timeout, op));
     }
 
-    // State transition logic with proper synchronization
     private State advanceStateIfNeeded() {
         stateLock.readLock().lock();
         try {
@@ -268,45 +288,52 @@ public final class CircuitBreaker {
     private void onSuccess() {
         lastSuccessTime.set(System.currentTimeMillis());
 
-        State current = state.get();
-        switch (current) {
-            case HALF_OPEN:
-                stateLock.writeLock().lock();
-                try {
-                    if (state.get() == State.HALF_OPEN) {
-                        int newSuccessCount = successCount.incrementAndGet();
-                        if (newSuccessCount >= successThreshold) {
-                            if (state.compareAndSet(State.HALF_OPEN, State.CLOSED)) {
-                                failureCount.set(0);
-                                successCount.set(0);
-                                halfOpenInFlight.set(0);
-                            }
+        // Acquire lock once for the entire state-changing operation
+        stateLock.writeLock().lock();
+        try {
+            State current = state.get();
+            switch (current) {
+                case HALF_OPEN:
+                    int newSuccessCount = successCount.incrementAndGet();
+                    if (newSuccessCount >= successThreshold) {
+                        if (state.compareAndSet(State.HALF_OPEN, State.CLOSED)) {
+                            resetCountersAndProbes();
                         }
                     }
-                } finally {
-                    stateLock.writeLock().unlock();
-                }
-                break;
+                    break;
 
-            case CLOSED:
-                failureCount.set(0); // Reset failure count on success
-                break;
+                case CLOSED:
+                    failureCount.set(0);
+                    break;
 
-            case OPEN:
-                // No action needed in OPEN state
-                break;
+                case OPEN:
+                    // No action needed
+                    break;
+            }
+        } finally {
+            stateLock.writeLock().unlock();
         }
+    }
+
+    private void resetCountersAndProbes() {
+        failureCount.set(0);
+        successCount.set(0);
+        halfOpenInFlight.set(0);
     }
 
     private void onFailure() {
         lastFailureTime.set(System.currentTimeMillis());
 
+        // Get current state once to avoid race conditions
         State current = state.get();
+
         switch (current) {
             case HALF_OPEN:
                 stateLock.writeLock().lock();
                 try {
-                    if (state.compareAndSet(State.HALF_OPEN, State.OPEN)) {
+                    // Double-check state hasn't changed
+                    if (state.get() == State.HALF_OPEN &&
+                            state.compareAndSet(State.HALF_OPEN, State.OPEN)) {
                         successCount.set(0);
                         halfOpenInFlight.set(0);
                     }
@@ -316,9 +343,21 @@ public final class CircuitBreaker {
                 break;
 
             case CLOSED:
-                int newFailureCount = failureCount.incrementAndGet();
-                if (newFailureCount >= failureThreshold) {
-                    transitionToOpen();
+                // CRITICAL FIX: Atomically increment failure count and check threshold under lock
+                stateLock.writeLock().lock();
+                try {
+                    // Double-check we're still in CLOSED state
+                    if (state.get() == State.CLOSED) {
+                        int newFailureCount = failureCount.incrementAndGet();
+                        if (newFailureCount >= failureThreshold) {
+                            // Transition to OPEN immediately under the same lock
+                            if (state.compareAndSet(State.CLOSED, State.OPEN)) {
+                                halfOpenInFlight.set(0);
+                            }
+                        }
+                    }
+                } finally {
+                    stateLock.writeLock().unlock();
                 }
                 break;
 
@@ -457,5 +496,11 @@ public final class CircuitBreaker {
                     " succ=" + successCount + "/" + successThreshold +
                     " probes=" + halfOpenInFlight + "/" + halfOpenMaxProbes + "]";
         }
+    }
+
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Experimental {
+        String value();
     }
 }

@@ -49,7 +49,7 @@ public final class ChannelUtils {
     private ChannelUtils() {
     }
 
-    // 🧩 Section: factories-strict
+    // [🧩 Section: factories-strict]
 
     /**
      * Create unlimited capacity channel (LinkedBlockingQueue).
@@ -76,7 +76,7 @@ public final class ChannelUtils {
     }
     // [/🧩 Section: factories-strict]
 
-    // 🧩 Section: send-receive-strict
+    // [🧩 Section: send-receive-strict]
 
     /**
      * Send a non-null item to a channel.
@@ -137,7 +137,7 @@ public final class ChannelUtils {
     }
     // [/🧩 Section: send-receive-strict]
 
-    // 🧩 Section: factories-interop
+    // [🧩 Section: factories-interop]
 
     /**
      * Create unlimited capacity interop channel.
@@ -164,7 +164,7 @@ public final class ChannelUtils {
     }
     // [/🧩 Section: factories-interop]
 
-    // 🧩 Section: send-receive-interop
+    // [🧩 Section: send-receive-interop]
 
     /**
      * Send a potentially null item to an interop channel.
@@ -206,6 +206,7 @@ public final class ChannelUtils {
     /**
      * Try to send to interop channel without blocking.
      */
+
     public static <T> boolean trySendInterop(@NonNull InteropChannel<T> ch, T item) {
         if (ch == null) throw new IllegalArgumentException("Channel cannot be null");
         boolean result = ch.trySend(item);
@@ -233,7 +234,7 @@ public final class ChannelUtils {
     }
     // [/🧩 Section: send-receive-interop]
 
-    // 🧩 Section: utilities
+    // [🧩 Section: utilities]
 
     /**
      * Check if a channel is closed.

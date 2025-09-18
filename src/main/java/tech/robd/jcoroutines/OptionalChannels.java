@@ -53,7 +53,7 @@ public final class OptionalChannels {
     private OptionalChannels() {
     }
 
-    // 🧩 Section: factories
+    // [🧩 Section: factories]
 
     /**
      * Create an unbounded channel backed by a {@link java.util.concurrent.LinkedBlockingQueue}.
@@ -81,7 +81,7 @@ public final class OptionalChannels {
     }
     // [/🧩 Section: factories]
 
-    // 🧩 Section: java-optional
+    // [🧩 Section: java-optional]
 
     /**
      * Send an {@link Optional} payload: present ⟶ value, empty ⟶ {@code null} (encoded internally).
@@ -119,7 +119,7 @@ public final class OptionalChannels {
     }
     // [/🧩 Section: java-optional]
 
-    // 🧩 Section: kotlin-null
+    // [🧩 Section: kotlin-null]
 
     /**
      * Send a nullable value directly. {@code null} is mapped to {@link Optional#empty()} for Java receivers.
@@ -155,7 +155,7 @@ public final class OptionalChannels {
     }
     // [/🧩 Section: kotlin-null]
 
-    // 🧩 Section: lifecycle
+    // [🧩 Section: lifecycle]
 
     /**
      * Close the channel. Pending receivers will see {@link InteropChannel.ClosedReceiveException}.

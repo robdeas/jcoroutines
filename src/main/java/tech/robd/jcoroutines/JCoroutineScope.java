@@ -60,7 +60,7 @@ import java.util.concurrent.Executors;
  */
 public interface JCoroutineScope extends AutoCloseable {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     /**
      * Launch an async operation that returns a handle for cancellation control.

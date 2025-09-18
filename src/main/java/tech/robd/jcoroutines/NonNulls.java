@@ -50,7 +50,7 @@ import java.util.function.Supplier;
  *       {@link IllegalStateException} with a message.</li>
  * </ul>
  *
- * <h3>Usage examples</h3>
+ * <h2>Usage examples</h2>
  *
  * <pre>{@code
  * // Value should not be null here – defensive guard

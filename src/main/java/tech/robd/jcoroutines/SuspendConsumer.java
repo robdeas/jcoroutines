@@ -50,7 +50,7 @@ import org.jspecify.annotations.NonNull;
 @FunctionalInterface
 public interface SuspendConsumer<T> {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     /**
      * Consumes {@code item} within the provided suspending {@code suspend} context.

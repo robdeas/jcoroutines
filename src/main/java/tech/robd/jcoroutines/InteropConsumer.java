@@ -56,7 +56,7 @@ import java.util.Optional;
 @FunctionalInterface
 public interface InteropConsumer<T> {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     /**
      * Consume the next element wrapped in an {@link Optional}. Empty == Kotlin {@code null}.

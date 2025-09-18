@@ -60,7 +60,7 @@ public final class PatternHelpers {
     private PatternHelpers() {
     }
 
-    // 🧩 Section: workers
+    // [🧩 Section: workers]
 
     /**
      * Process a single task — simulates variable work time to demonstrate scheduling and cancellation.
@@ -119,7 +119,7 @@ public final class PatternHelpers {
     }
     // [/🧩 Section: workers]
 
-    // 🧩 Section: patterns
+    // [🧩 Section: patterns]
 
     /**
      * Producer–workers–collector pipeline.
@@ -268,7 +268,7 @@ public final class PatternHelpers {
     }
     // [/🧩 Section: patterns]
 
-    // 🧩 Section: handles
+    // [🧩 Section: handles]
 
     /**
      * Cancellable version of {@link #runPipeline(SuspendContext, List, int)} that returns handles
@@ -384,7 +384,7 @@ public final class PatternHelpers {
     }
     // [/🧩 Section: handles]
 
-    // 🧩 Section: utilities
+    // [🧩 Section: utilities]
     private static String cleanData(@NonNull SuspendContext s, @NonNull String raw) {
         s.delay(10);
         return raw.trim().toLowerCase();

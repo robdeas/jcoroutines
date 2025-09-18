@@ -59,7 +59,7 @@ public final class InteropChannel<T> extends BaseChannel<T> {
         super(q);
     }
 
-    // 🧩 Section: factories
+    // [🧩 Section: factories]
 
     /**
      * Create an unbounded channel backed by a {@link LinkedBlockingQueue}.
@@ -88,14 +88,14 @@ public final class InteropChannel<T> extends BaseChannel<T> {
     }
     // [/🧩 Section: factories]
 
-    // 🧩 Section: constants
+    // [🧩 Section: constants]
     /**
      * Public alias of the internal null sentinel (used to encode/decode {@code Optional.empty()} / Kotlin {@code null}).
      */
     public static final Object OPTIONAL_EMPTY = BaseChannel.OPTIONAL_EMPTY;
     // [/🧩 Section: constants]
 
-    // 🧩 Section: send-receive
+    // [🧩 Section: send-receive]
 
     /**
      * Send a value (nullable allowed). Raw {@code null} is encoded as {@link #OPTIONAL_EMPTY},
@@ -155,7 +155,7 @@ public final class InteropChannel<T> extends BaseChannel<T> {
     }
     // [/🧩 Section: send-receive]
 
-    // 🧩 Section: nonblocking
+    // [🧩 Section: nonblocking]
 
     /**
      * Try a non-blocking send. {@code null} is encoded as {@link #OPTIONAL_EMPTY}.
@@ -178,7 +178,7 @@ public final class InteropChannel<T> extends BaseChannel<T> {
     }
     // [/🧩 Section: nonblocking]
 
-    // 🧩 Section: iteration
+    // [🧩 Section: iteration]
 
     /**
      * Iterates over channel values until closed, invoking {@code action} for each element.

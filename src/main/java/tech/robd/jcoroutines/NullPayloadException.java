@@ -43,7 +43,7 @@ package tech.robd.jcoroutines;
  */
 public final class NullPayloadException extends RuntimeException {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     /**
      * Creates an exception with the default message.

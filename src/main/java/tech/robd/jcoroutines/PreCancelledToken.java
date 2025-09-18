@@ -45,7 +45,7 @@ package tech.robd.jcoroutines;
  */
 public final class PreCancelledToken implements CancellationToken {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
     /**
      * Singleton instance of the pre-cancelled token.
      */

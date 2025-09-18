@@ -19,17 +19,19 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     id("java")
-    kotlin("jvm")
     `java-library`
     `maven-publish`
 
     id("net.ltgt.errorprone") version "4.2.0"
     id("com.github.spotbugs") version "6.0.7"
     id("pmd")
+
+    // JReleaser for Central Publishing Portal
+    id("org.jreleaser") version "1.20.0"
 }
 
 group = "tech.robd"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 
 repositories {
     mavenLocal()
@@ -41,18 +43,20 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.30.0")
     errorprone("com.uber.nullaway:nullaway:0.12.0")
 
-
     compileOnly("org.jspecify:jspecify:1.0.0")
     implementation("org.jetbrains:annotations:26.0.2")
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.jspecify:jspecify:1.0.0")
-    implementation("org.slf4j:slf4j-api:2.0.13") // or latest
-    implementation(kotlin("stdlib-jdk8"))
-
+    implementation("org.slf4j:slf4j-api:2.0.13")
     testRuntimeOnly("org.slf4j:slf4j-simple:2.0.13")
 }
 
+// Add source and javadoc jars
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 tasks.withType<SpotBugsTask>().configureEach {
     ignoreFailures = true
@@ -65,14 +69,12 @@ tasks.withType<SpotBugsTask>().configureEach {
     auxClassPaths.setFrom(configurations.compileClasspath)
 
     reports {
-        // define a text report explicitly
         create("text") {
             required.set(true)
             outputLocation.set(layout.buildDirectory.file("reports/spotbugs/${name}.txt"))
         }
     }
 
-    // Nice clickable path at the end
     doLast {
         val txt = reports["text"].outputLocation.get().asFile
         println("SpotBugs text report: file://${txt.absolutePath}")
@@ -82,18 +84,15 @@ tasks.withType<SpotBugsTask>().configureEach {
 tasks.named<com.github.spotbugs.snom.SpotBugsTask>("spotbugsMain")
 tasks.named<com.github.spotbugs.snom.SpotBugsTask>("spotbugsTest")
 
-// ---- PMD (report-only) ----
 pmd {
-    toolVersion = "7.5.0"     // fallback to "6.55.0" if needed
+    toolVersion = "7.5.0"
     isConsoleOutput = true
     ruleSetFiles = files("config/pmd/ruleset.xml")
     ruleSets = emptyList()
-    ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
 tasks.withType<Pmd>().configureEach {
-    ignoreFailures = true      // <- correct property
-
+    ignoreFailures = true
     exclude("**/generated/**", "**/build/**")
 
     reports {
@@ -102,7 +101,6 @@ tasks.withType<Pmd>().configureEach {
         xml.required.set(true)
         xml.outputLocation.set(layout.buildDirectory.file("reports/pmd/${name}.xml"))
     }
-
 
     doLast {
         val html = reports.html.outputLocation.get().asFile
@@ -115,7 +113,7 @@ tasks.withType<Pmd>().configureEach {
         }
     }
 }
-// Ensure both run with the standard verification phase
+
 tasks.named("check") {
     dependsOn("spotbugsMain", "spotbugsTest", "pmdMain", "pmdTest")
 }
@@ -126,9 +124,7 @@ tasks.register("lintAll") {
     dependsOn("check")
 }
 
-
-//
-// Disable EP on main, enable on tests
+// ErrorProne configuration
 tasks.named<JavaCompile>("compileJava") {
     options.errorprone.isEnabled.set(false)
 }
@@ -136,7 +132,7 @@ tasks.named<JavaCompile>("compileTestJava") {
     options.errorprone.isEnabled.set(true)
     options.errorprone {
         option("-Xep:NullAway:ERROR")
-        option("-XepOpt:NullAway:AnnotatedPackages=tech.robd") // <- yours
+        option("-XepOpt:NullAway:AnnotatedPackages=tech.robd")
         option("-XepOpt:NullAway:JSpecifyMode=true")
     }
 }
@@ -158,7 +154,6 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.register("uberJar", Jar::class) {
     dependsOn(tasks.jar)
     archiveClassifier.set("uber")
-
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(sourceSets.main.get().output)
@@ -167,13 +162,105 @@ tasks.register("uberJar", Jar::class) {
     }
 }
 
+// Maven publishing configuration for JReleaser
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("maven") {
             from(components["java"])
-            groupId = "tech.robd"
-            artifactId = "jcoroutines"
-            version = "0.1.0-SNAPSHOT"
+
+            pom {
+                name.set("J Coroutines")
+                description.set("A coroutines library for Java.")
+                url.set("https://robd.tech/jcoroutines")
+                inceptionYear.set("2025")
+
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("robd")
+                        name.set("Robert Deas")
+                        email.set("rob@robd.tech")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:https://github.com/robdeas/jcoroutines.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:robdeas/jcoroutines.git")
+                    url.set("https://github.com/robdeas/jcoroutines")
+                }
+            }
+        }
+    }
+
+    // Publish to local staging directory for JReleaser
+    repositories {
+        maven {
+            name = "staging"
+            url = layout.buildDirectory.dir("staging-deploy").get().asFile.toURI()
+        }
+    }
+}
+
+// JReleaser configuration
+jreleaser {
+    // Project metadata
+    project {
+        name.set("jcoroutines")
+        description.set("A coroutines library for Java.")
+        inceptionYear.set("2025")
+        authors.set(listOf("Robert Deas"))
+        license.set("Apache-2.0")
+        copyright.set("Copyright (c) 2025 Rob Deas Ltd.")
+
+        links {
+            homepage.set("https://robd.tech/jcoroutines")
+            bugTracker.set("https://github.com/robdeas/jcoroutines/issues")
+            documentation.set("https://robd.tech/jcoroutines")
+        }
+    }
+
+    // Disable GitHub release since we only want Maven Central
+    release {
+        github {
+            enabled.set(true)  // Must be enabled but we'll skip the actual release
+            skipRelease.set(true)  // Skip the release step
+            skipTag.set(true)      // Skip tagging
+            token.set("dummy")     // Dummy token to satisfy validation
+        }
+    }
+
+    // Enable signing - use environment variables
+    signing {
+        active.set(org.jreleaser.model.Active.ALWAYS)
+        armored.set(true)
+
+        // JReleaser will read from environment variables:
+        // JRELEASER_GPG_PUBLIC_KEY, JRELEASER_GPG_SECRET_KEY, JRELEASER_GPG_PASSPHRASE
+        passphrase.set(findProperty("signing.password") as String?)
+    }
+
+    // Deploy to Maven Central
+    deploy {
+        maven {
+            mavenCentral {
+                create("sonatype") {
+                    active.set(org.jreleaser.model.Active.ALWAYS)
+                    url.set("https://central.sonatype.com/api/v1/publisher")
+
+                    // Credentials from gradle.properties or environment variables
+                    username.set(findProperty("centralUsername") as String? ?: System.getenv("CENTRAL_USERNAME"))
+                    password.set(findProperty("centralPassword") as String? ?: System.getenv("CENTRAL_PASSWORD"))
+
+                    // Staging repository
+                    stagingRepository(layout.buildDirectory.dir("staging-deploy").get().asFile.path)
+                }
+            }
         }
     }
 }

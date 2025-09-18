@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
 @FunctionalInterface
 public interface SuspendFunction<T extends @Nullable Object> {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     /**
      * Applies this function within the provided suspending {@code suspend} context.

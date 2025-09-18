@@ -67,7 +67,7 @@ public final class Dispatcher {
         this.name = name;
     }
 
-    // 🧩 Section: execution
+    // [🧩 Section: execution]
 
     /**
      * Run an asynchronous operation on this dispatcher.
@@ -97,7 +97,7 @@ public final class Dispatcher {
             }
         };
 
-        // 🧩 Point: execution/submit-task
+        // [🧩 Point: execution/submit-task]
         try {
             executor.execute(task);
         } catch (RejectedExecutionException rex) {
@@ -111,7 +111,7 @@ public final class Dispatcher {
         WeakReference<JCoroutineHandle<?>> weakRef = new WeakReference<>(handle);
         activeHandles.add(weakRef);
 
-        // 🧩 Point: execution/cleanup-handle
+        // [🧩 Point: execution/cleanup-handle]
         handle.result().whenComplete((r, t) -> {
             activeHandles.removeIf(ref -> ref.get() == handle || ref.get() == null);
         });
@@ -132,7 +132,7 @@ public final class Dispatcher {
         CompletableFuture<Void> cf = new CompletableFuture<>();
         CancellationToken token = new CancellationTokenImpl();
 
-        // 🧩 Point: execution/construct-launch-task
+        // [🧩 Point: execution/construct-launch-task]
         Runnable task = () -> {
             try (var scope = new JCoroutineScopeImpl("dispatcher-" + name)) {
                 var suspend = SuspendContext.create(scope, token);
@@ -148,7 +148,7 @@ public final class Dispatcher {
             }
         };
 
-        // 🧩 Point: execution/submit-launch-task
+        // [🧩 Point: execution/submit-launch-task]
         try {
             executor.execute(task);
         } catch (RejectedExecutionException rex) {
@@ -161,7 +161,7 @@ public final class Dispatcher {
         WeakReference<JCoroutineHandle<?>> weakRef = new WeakReference<>(handle);
         activeHandles.add(weakRef);
 
-        // 🧩 Point: execution/cleanup-launch-handle
+        // [🧩 Point: execution/cleanup-launch-handle]
         handle.result().whenComplete((r, t) -> {
             activeHandles.removeIf(ref -> ref.get() == handle || ref.get() == null);
         });
@@ -170,7 +170,7 @@ public final class Dispatcher {
     }
     // [/🧩 Section: execution]
 
-    // 🧩 Section: lifecycle
+    // [🧩 Section: lifecycle]
 
     /**
      * Gracefully shuts down the underlying executor.
@@ -195,7 +195,7 @@ public final class Dispatcher {
      * <p>Cancels all {@link JCoroutineHandle}s, clears internal tracking, and shuts down the executor now.</p>
      */
     public void kill() {
-        // 🧩 Point: lifecycle/cancel-handles
+        // [🧩 Point: lifecycle/cancel-handles]
         Iterator<WeakReference<JCoroutineHandle<?>>> it = activeHandles.iterator();
         while (it.hasNext()) {
             WeakReference<JCoroutineHandle<?>> ref = it.next();
@@ -208,7 +208,7 @@ public final class Dispatcher {
         }
         activeHandles.clear();
 
-        // 🧩 Point: lifecycle/shutdown-now
+        // [🧩 Point: lifecycle/shutdown-now]
         if (executor != null) {
             executor.shutdownNow();
             try {
@@ -223,7 +223,7 @@ public final class Dispatcher {
     }
     // [/🧩 Section: lifecycle]
 
-    // 🧩 Section: info
+    // [🧩 Section: info]
 
     /**
      * Returns the underlying {@link ExecutorService}.
@@ -249,7 +249,7 @@ public final class Dispatcher {
     }
     // [/🧩 Section: info]
 
-    // 🧩 Section: factories
+    // [🧩 Section: factories]
 
     /**
      * Creates a new dispatcher wrapping a given executor.

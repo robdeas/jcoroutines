@@ -59,7 +59,7 @@ public final class NeverCancelledToken implements CancellationToken {
 
     private NeverCancelledToken() { }
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     @Override
     // Always not-cancelled; callers can branch without synchronization.

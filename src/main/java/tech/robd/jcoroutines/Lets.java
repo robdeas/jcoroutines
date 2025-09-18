@@ -52,7 +52,7 @@ import java.util.function.Function;
 public final class Lets {
     private Lets() { /* utility class */ }
 
-    // 🧩 Section: nullable-helpers
+    // [🧩 Section: nullable-helpers]
 
     /**
      * If {@code value} is non-null, invokes {@code action} with it.
@@ -95,7 +95,7 @@ public final class Lets {
     }
     // [/🧩 Section: nullable-helpers]
 
-    // 🧩 Section: optional-helpers
+    // [🧩 Section: optional-helpers]
 
     /**
      * If {@code opt} is present, invokes {@code action} with its value.
@@ -124,7 +124,7 @@ public final class Lets {
     }
     // [/🧩 Section: optional-helpers]
 
-    // 🧩 Section: elvis
+    // [🧩 Section: elvis]
 
     /**
      * Returns {@code value} if non-null; otherwise returns {@code defaultValue}.
@@ -172,7 +172,7 @@ public final class Lets {
     }
     // [/🧩 Section: elvis]
 
-    // 🧩 Section: handles
+    // [🧩 Section: handles]
 
     /**
      * If {@code handle} is non-null and still active, join it and pass the result to {@code action}.

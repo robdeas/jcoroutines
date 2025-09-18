@@ -51,7 +51,7 @@ import org.jspecify.annotations.NonNull;
 @FunctionalInterface
 public interface SuspendRunnable {
 
-    // 🧩 Section: api
+    // [🧩 Section: api]
 
     /**
      * Executes this runnable within the provided suspending {@code suspend} context.

@@ -53,7 +53,7 @@ public final class CoroutineUtils {
     private CoroutineUtils() {
     }
 
-    // 🧩 Section: cancellation
+    // [🧩 Section: cancellation]
 
     /**
      * Cancel handle if not null. @return true if cancellation requested.
@@ -95,7 +95,7 @@ public final class CoroutineUtils {
     }
     // [/🧩 Section: cancellation]
 
-    // 🧩 Section: status
+    // [🧩 Section: status]
 
     /**
      * @return true if all handles are completed.
@@ -132,7 +132,7 @@ public final class CoroutineUtils {
     }
     // [/🧩 Section: status]
 
-    // 🧩 Section: waiting
+    // [🧩 Section: waiting]
 
     /**
      * Block until all handles complete or timeout expires.
@@ -203,7 +203,7 @@ public final class CoroutineUtils {
     }
     // [/🧩 Section: waiting]
 
-    // 🧩 Section: resource-management
+    // [🧩 Section: resource-management]
 
     /**
      * Execute a block, then cancel all handles afterwards (even on exception).
@@ -265,7 +265,7 @@ public final class CoroutineUtils {
     }
     // [/🧩 Section: resource-management]
 
-    // 🧩 Section: debug
+    // [🧩 Section: debug]
 
     /**
      * Return a human-readable summary of handle states.

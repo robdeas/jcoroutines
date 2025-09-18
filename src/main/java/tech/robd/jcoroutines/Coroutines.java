@@ -58,7 +58,7 @@ import java.util.concurrent.*;
  */
 public final class Coroutines {
 
-    // 🧩 Section: executors
+    // [🧩 Section: executors]
     /**
      * Shared virtual-thread-per-task executor (used by global VT scope, shutdown on {@link #shutdown()}).
      */
@@ -75,7 +75,7 @@ public final class Coroutines {
     private Coroutines() {
     }
 
-    // 🧩 Section: global-scopes
+    // [🧩 Section: global-scopes]
     /**
      * Global VT scope for I/O-bound work.
      */
@@ -87,7 +87,7 @@ public final class Coroutines {
     private static final JCoroutineScope GLOBAL_CPU_SCOPE = new StandardCoroutineScope(); // Configure with CPU executor
     // [/🧩 Section: global-scopes]
 
-    // 🧩 Section: factories
+    // [🧩 Section: factories]
 
     /**
      * Create a new root scope owned by the caller.
@@ -100,7 +100,7 @@ public final class Coroutines {
     }
     // [/🧩 Section: factories]
 
-    // 🧩 Section: runBlocking
+    // [🧩 Section: runBlocking]
 
     /**
      * Run a suspend block on a CPU-oriented scope and return its result, blocking the caller.
@@ -136,7 +136,7 @@ public final class Coroutines {
     }
     // [/🧩 Section: runBlocking]
 
-    // 🧩 Section: async-launch (VT/global)
+    // [🧩 Section: async-launch (VT/global)]
 
     /**
      * Start an async operation on the global VT scope and return a handle for cancellation/await.
@@ -157,7 +157,7 @@ public final class Coroutines {
     }
     // [/🧩 Section: async-launch (VT/global)]
 
-    // 🧩 Section: async-launch (CPU/global)
+    // [🧩 Section: async-launch (CPU/global)]
 
     /**
      * Start a CPU-oriented async operation on the global CPU scope.
@@ -176,7 +176,7 @@ public final class Coroutines {
     }
     // [/🧩 Section: async-launch (CPU/global)]
 
-    // 🧩 Section: convenience (CompletableFuture + fire-and-forget)
+    // [🧩 Section: convenience (CompletableFuture + fire-and-forget)]
 
     /**
      * Async (VT) returning a {@link CompletableFuture} for compatibility.
@@ -207,7 +207,7 @@ public final class Coroutines {
     }
     // [/🧩 Section: convenience (CompletableFuture + fire-and-forget)]
 
-    // 🧩 Section: shutdown
+    // [🧩 Section: shutdown]
 
     /**
      * Gracefully shut down global scopes and shared executors.

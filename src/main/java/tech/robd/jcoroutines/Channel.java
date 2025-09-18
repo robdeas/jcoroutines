@@ -59,7 +59,7 @@ import java.util.concurrent.*;
 public final class Channel<T> extends BaseChannel<T> {
     private static final Diagnostics DIAG = Diagnostics.of(Channel.class);
 
-    // 🧩 Section: construction
+    // [🧩 Section: construction]
     private Channel(@NonNull BlockingQueue<@Nullable Object> channelQueue) {
         super(channelQueue);
         DIAG.debug("Channel created with queue type: {}", channelQueue.getClass().getSimpleName());
@@ -91,7 +91,7 @@ public final class Channel<T> extends BaseChannel<T> {
     }
     // [/🧩 Section: construction]
 
-    // 🧩 Section: send
+    // [🧩 Section: send]
 
     /**
      * Send a non-null item (blocking if necessary).
@@ -119,7 +119,7 @@ public final class Channel<T> extends BaseChannel<T> {
     }
     // [/🧩 Section: send]
 
-    // 🧩 Section: receive
+    // [🧩 Section: receive]
 
     /**
      * Receive a value (blocking), throwing if channel closed or payload null.
@@ -166,7 +166,7 @@ public final class Channel<T> extends BaseChannel<T> {
     }
     // [/🧩 Section: receive]
 
-    // 🧩 Section: iteration
+    // [🧩 Section: iteration]
 
     /**
      * Loop consuming items until channel closed.
