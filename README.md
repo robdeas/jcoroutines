@@ -4,6 +4,13 @@
 
 A Java-first coroutine library bringing structured concurrency, cooperative cancellation, and message-passing channels to any JVM project. No compiler plugins, no runtime bytecode manipulation - just clean APIs built on Virtual Threads and explicit context passing.
 
+[![Maven Central](https://img.shields.io/maven-central/v/tech.robd/jcoroutines.svg)](https://central.sonatype.com/artifact/tech.robd/jcoroutines)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-robd.tech%2Fjcoroutines-1f6feb)](https://robd.tech/jcoroutines)
+
+**Current release:** [`tech.robd:jcoroutines:0.1.0`](https://central.sonatype.com/artifact/tech.robd/jcoroutines)  
+**Documentation:** https://robd.tech/jcoroutines
+
 ## Why JCoroutines?
 
 - **Structured Concurrency**: Parent-child relationships ensure no leaked tasks
@@ -17,11 +24,19 @@ A Java-first coroutine library bringing structured concurrency, cooperative canc
 - No additional runtime dependencies
 
 ## Installation
-
+### Gradle
 ```gradle
 dependencies {
-    implementation 'tech.robd.jcoroutines:jcoroutines-core:1.0.0'
+    implementation 'tech.robd.jcoroutines:jcoroutines-core:0.1.0'
 }
+```
+### Maven
+```maven
+<dependency>
+  <groupId>tech.robd</groupId>
+  <artifactId>jcoroutines</artifactId>
+  <version>0.1.0</version>
+</dependency>
 ```
 
 ## Quick Start
