@@ -163,7 +163,7 @@ Runtime.getRuntime().addShutdownHook(new Thread(Coroutines::shutdown));
 
 ## Next Steps
 
-- Read the [Examples](\basic_examples.md) for getting started examples
+- Read the [Examples](https://github.com/robdeas/jcoroutines/blob/main/basic_examples.md) for getting started examples
 
 
 ## License
